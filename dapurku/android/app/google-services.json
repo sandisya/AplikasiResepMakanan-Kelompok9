@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "187564198256",
+    "project_id": "foodrecipe-5ae5a",
+    "storage_bucket": "foodrecipe-5ae5a.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:187564198256:android:235af068dcfd7bbadfe7b5",
+        "android_client_info": {
+          "package_name": "com.example.dapurku"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD_3bDsgeAGEv2tiHwDi6CzT5LNcXydsdQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
