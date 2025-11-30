@@ -26,13 +26,15 @@ class _AdminRecipeFormState extends State<AdminRecipeForm> {
     super.initState();
 
     if (widget.recipe != null) {
-      titleC.text = widget.recipe!.title;
-      imageC.text = widget.recipe!.image;
-      categoryC.text = widget.recipe!.category;
-      timeC.text = widget.recipe!.time.toString();
-      isPopular = widget.recipe!.isPopular;
+      final r = widget.recipe!;
 
-      for (var s in widget.recipe!.steps) {
+      titleC.text = r.title;
+      imageC.text = r.image;
+      categoryC.text = r.category;
+      timeC.text = r.time.toString();
+      isPopular = r.isPopular;
+
+      for (var s in r.steps) {
         stepsControllers.add(TextEditingController(text: s));
       }
     } else {
@@ -43,46 +45,155 @@ class _AdminRecipeFormState extends State<AdminRecipeForm> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.orange.shade50,
       appBar: AppBar(
         title: Text(widget.recipe == null ? "Add Recipe" : "Edit Recipe"),
         backgroundColor: Colors.orange,
+        elevation: 0,
       ),
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
-          TextField(controller: titleC, decoration: const InputDecoration(labelText: "Title")),
-          TextField(controller: imageC, decoration: const InputDecoration(labelText: "Image URL")),
-          TextField(controller: categoryC, decoration: const InputDecoration(labelText: "Category")),
-          TextField(controller: timeC, decoration: const InputDecoration(labelText: "Time (mins)")),
+          // ======= IMAGE PREVIEW ==========
+          Container(
+            height: 180,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(14),
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  blurRadius: 6,
+                  offset: const Offset(0, 3),
+                  color: Colors.black.withOpacity(0.1),
+                )
+              ],
+              image: imageC.text.isNotEmpty
+                  ? DecorationImage(
+                      image: NetworkImage(imageC.text),
+                      fit: BoxFit.cover,
+                    )
+                  : null,
+            ),
+            child: imageC.text.isEmpty
+                ? const Center(
+                    child: Text(
+                      "Image Preview",
+                      style: TextStyle(color: Colors.black54),
+                    ),
+                  )
+                : null,
+          ),
+
+          const SizedBox(height: 15),
+
+          TextField(
+            controller: imageC,
+            decoration: InputDecoration(
+              labelText: "Image URL",
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              prefixIcon: const Icon(Icons.image),
+            ),
+            onChanged: (v) => setState(() {}),
+          ),
+
+          const SizedBox(height: 20),
+
+          TextField(
+            controller: titleC,
+            decoration: InputDecoration(
+              labelText: "Title",
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              prefixIcon: const Icon(Icons.title),
+            ),
+          ),
+
+          const SizedBox(height: 15),
+
+          TextField(
+            controller: categoryC,
+            decoration: InputDecoration(
+              labelText: "Category",
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              prefixIcon: const Icon(Icons.category),
+            ),
+          ),
+
+          const SizedBox(height: 15),
+
+          TextField(
+            controller: timeC,
+            keyboardType: TextInputType.number,
+            decoration: InputDecoration(
+              labelText: "Time (mins)",
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              prefixIcon: const Icon(Icons.timer),
+            ),
+          ),
+
           SwitchListTile(
             title: const Text("Popular Recipe?"),
             value: isPopular,
             onChanged: (v) => setState(() => isPopular = v),
+            activeColor: Colors.orange,
           ),
 
           const SizedBox(height: 20),
-          const Text("Steps", style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold)),
+
+          const Text(
+            "Steps",
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+
+          const SizedBox(height: 10),
 
           Column(
             children: stepsControllers.map((c) {
               final index = stepsControllers.indexOf(c);
-              return Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: c,
-                      decoration: InputDecoration(labelText: "Step ${index + 1}"),
+
+              return Container(
+                margin: const EdgeInsets.only(bottom: 10),
+                padding: const EdgeInsets.all(5),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                      color: Colors.black.withOpacity(0.08),
+                    )
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: c,
+                        maxLines: 3,
+                        decoration: InputDecoration(
+                          labelText: "Step ${index + 1}",
+                          border: InputBorder.none,
+                        ),
+                      ),
                     ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.delete),
-                    onPressed: () {
-                      setState(() {
-                        stepsControllers.remove(c);
-                      });
-                    },
-                  )
-                ],
+                    IconButton(
+                      icon: const Icon(Icons.delete, color: Colors.redAccent),
+                      onPressed: () {
+                        setState(() {
+                          stepsControllers.remove(c);
+                        });
+                      },
+                    )
+                  ],
+                ),
               );
             }).toList(),
           ),
@@ -97,25 +208,43 @@ class _AdminRecipeFormState extends State<AdminRecipeForm> {
             label: const Text("Add Step"),
           ),
 
-          ElevatedButton(
-            onPressed: saveRecipe,
-            child: const Text("SAVE"),
+          const SizedBox(height: 20),
+
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.orange,
+                padding: const EdgeInsets.all(14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              onPressed: saveRecipe,
+              child: const Text(
+                "SAVE",
+                style: TextStyle(fontSize: 16),
+              ),
+            ),
           )
         ],
       ),
     );
   }
 
+  // ================= SAVE ======================
   void saveRecipe() async {
-    final steps =
-        stepsControllers.map((c) => c.text).where((s) => s.isNotEmpty).toList();
+    final steps = stepsControllers
+        .map((c) => c.text)
+        .where((s) => s.isNotEmpty)
+        .toList();
 
     final recipe = Recipe(
       id: widget.recipe?.id ?? "",
       title: titleC.text,
       image: imageC.text,
       category: categoryC.text,
-      time: int.parse(timeC.text),
+      time: int.tryParse(timeC.text) ?? 0,
       isPopular: isPopular,
       steps: steps,
     );
