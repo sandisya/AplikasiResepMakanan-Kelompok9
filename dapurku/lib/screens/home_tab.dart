@@ -151,7 +151,7 @@ class HomeTab extends StatelessWidget {
       onTap: () => Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (_) => RecipeDetailScreen(title: recipe.title)),
+            builder: (_) => RecipeDetailScreen(recipe: recipe)),
       ),
       child: Container(
         padding: const EdgeInsets.all(12),
