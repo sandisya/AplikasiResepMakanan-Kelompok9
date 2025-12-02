@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'login_screen.dart';
 import 'home_screen.dart';
 import 'admin_screen.dart';
 
@@ -22,15 +21,14 @@ class _SplashScreenState extends State<SplashScreen> {
       final user = FirebaseAuth.instance.currentUser;
 
       if (user == null) {
-        if (!mounted) return;
+        // ❗ User tidak login → tetap masuk Home
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (_) => const LoginScreen()),
+          MaterialPageRoute(builder: (_) => const HomeScreen()),
         );
         return;
       }
 
-      // CEK ROLE USER
       final doc = await FirebaseFirestore.instance
           .collection("users")
           .doc(user.uid)

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'home_tab.dart';
 import 'favorites_tab.dart';
 import 'profile_screen.dart';
@@ -14,9 +15,9 @@ class _HomeScreenState extends State<HomeScreen> {
   int _index = 0;
 
   final tabs = [
-    HomeTab(),
-    FavoritesTab(),
-    ProfileScreen(),
+     HomeTab(),
+    const FavoritesTab(),
+    const ProfileScreen(),
   ];
 
   @override
@@ -27,24 +28,14 @@ class _HomeScreenState extends State<HomeScreen> {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _index,
         onTap: (i) => setState(() => _index = i),
-        selectedItemColor: Colors.orange,  // FIX: same theme as mockup
+        selectedItemColor: Colors.orange,
         unselectedItemColor: Colors.grey,
         elevation: 10,
-        showUnselectedLabels: true,
         type: BottomNavigationBarType.fixed,
         items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.favorite_border),
-            label: 'Favorites',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+          BottomNavigationBarItem(icon: Icon(Icons.favorite_border), label: 'Favorites'),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
         ],
       ),
     );
