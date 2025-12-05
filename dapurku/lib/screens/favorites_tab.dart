@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/recipe_model.dart';
 import 'recipe_detail_screen.dart';
 import 'login_screen.dart';
@@ -11,14 +12,13 @@ class FavoritesTab extends StatelessWidget {
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
 
-    final List<Recipe> favorites = [];
-
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // HEADER
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: const [
@@ -32,12 +32,13 @@ class FavoritesTab extends StatelessWidget {
                 Icon(Icons.search, color: Colors.orange),
               ],
             ),
+
             const SizedBox(height: 20),
 
+            // Jika belum login
             if (user == null)
               Container(
                 padding: const EdgeInsets.all(12),
-                margin: const EdgeInsets.only(bottom: 15),
                 decoration: BoxDecoration(
                   color: Colors.orange.shade100,
                   borderRadius: BorderRadius.circular(12),
@@ -47,29 +48,26 @@ class FavoritesTab extends StatelessWidget {
                     const Icon(Icons.info, color: Colors.orange),
                     const SizedBox(width: 10),
                     const Expanded(
-                      child: Text("Login untuk menyimpan resep favorit."),
-                    ),
+                        child: Text("Login untuk melihat resep favorit.")),
                     TextButton(
                       onPressed: () => Navigator.push(
                         context,
-                        MaterialPageRoute(
-                            builder: (_) => const LoginScreen()),
+                        MaterialPageRoute(builder: (_) => const LoginScreen()),
                       ),
-                      child: const Text(
-                        "Login",
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
+                      child: const Text("Login"),
                     ),
                   ],
                 ),
               ),
 
+            const SizedBox(height: 16),
             const Text("Favorites",
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 12),
 
-            // 🔥 Jika tidak ada data
-            if (favorites.isEmpty)
+            const SizedBox(height: 10),
+
+            // Jika belum login
+            if (user == null)
               const Expanded(
                 child: Center(
                   child: Text(
@@ -77,43 +75,77 @@ class FavoritesTab extends StatelessWidget {
                     style: TextStyle(color: Colors.grey, fontSize: 16),
                   ),
                 ),
-              )
-            else
+              ),
+
+            // 🔥 STREAM DATA FAVORITES DARI:
+            // users / {uid} / favorites / {recipeId}
+            if (user != null)
               Expanded(
-                child: ListView.builder(
-                  itemCount: favorites.length,
-                  itemBuilder: (_, i) {
-                    final food = favorites[i];
+                child: StreamBuilder(
+                  stream: FirebaseFirestore.instance
+                      .collection("users")
+                      .doc(user.uid)
+                      .collection("favorites")
+                      .snapshots(),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) {
+                      return const Center(
+                          child: CircularProgressIndicator());
+                    }
 
-                    return Card(
-                      margin: const EdgeInsets.only(bottom: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: ListTile(
-                        contentPadding: const EdgeInsets.all(12),
-                        leading: ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: Image.network(
-                            food.image,
-                            width: 60,
-                            height: 60,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                        title: Text(food.title,
-                            style: const TextStyle(
-                                fontWeight: FontWeight.bold)),
-                        trailing: const Icon(Icons.favorite, color: Colors.red),
+                    final docs = snapshot.data!.docs;
 
-                        onTap: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) =>
-                                RecipeDetailScreen(recipe: food),
-                          ),
+                    if (docs.isEmpty) {
+                      return const Center(
+                        child: Text(
+                          "Belum ada resep favorit",
+                          style: TextStyle(color: Colors.grey),
                         ),
-                      ),
+                      );
+                    }
+
+                    final favorites = docs
+                        .map((doc) =>
+                            Recipe.fromFirestore(doc.data(), doc.id))
+                        .toList();
+
+                    return ListView.builder(
+                      itemCount: favorites.length,
+                      itemBuilder: (_, i) {
+                        final food = favorites[i];
+
+                        return Card(
+                          margin: const EdgeInsets.only(bottom: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: ListTile(
+                            contentPadding: const EdgeInsets.all(12),
+                            leading: ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: Image.network(
+                                food.image,
+                                width: 60,
+                                height: 60,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                            title: Text(food.title,
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.bold)),
+                            trailing: const Icon(Icons.favorite,
+                                color: Colors.red),
+
+                            onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) =>
+                                    RecipeDetailScreen(recipe: food),
+                              ),
+                            ),
+                          ),
+                        );
+                      },
                     );
                   },
                 ),

@@ -7,6 +7,7 @@ class Recipe {
   bool isPopular;
   List<String> ingredients;
   List<String> steps;
+  bool isFavorite;
 
   Recipe({
     required this.id,
@@ -17,6 +18,7 @@ class Recipe {
     required this.isPopular,
     required this.ingredients,
     required this.steps,
+    this.isFavorite = false, // default: tidak favorit
   });
 
   Map<String, dynamic> toMap() {
